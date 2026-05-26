@@ -1,0 +1,254 @@
+---
+title: "Clase 8 - Comunicar resultados con Quarto"
+format: html
+---
+
+# 1. Comunicar resultados con Quarto
+
+## ¿Qué es Quarto?
+
+**Quarto** es una herramienta que permite combinar:
+
+-   Texto
+-   Código
+-   Resultados
+-   Gráficos
+-   Tablas
+
+en un único documento reproducible.
+
+Un archivo Quarto utiliza la extensión:
+
+``` text
+.qmd
+```
+
+y puede exportarse a múltiples formatos como:
+
+-   HTML
+-   PDF
+-   Word
+-   PowerPoint
+-   RevealJS (presentaciones web)
+
+## Diferencias entre .R, .Rmd y .Qmd
+
+| Tipo de archivo | Contiene código | Contiene texto | Exporta documentos |
+|-----------------|-----------------|----------------|--------------------|
+| .R              | Sí              | No             | No                 |
+| .Rmd            | Sí              | Sí             | Sí                 |
+| .qmd            | Sí              | Sí             | Sí                 |
+
+### Script R (.R)
+
+Ideal para:
+
+-   Automatizaciones
+-   Funciones
+-   Procesamiento de datos
+
+``` r
+mean(c(1,2,3))
+```
+
+### R Markdown (.Rmd)
+
+Combina:
+
+-   texto
+-   código
+-   resultados
+
+Fue durante muchos años el estándar de RStudio.
+
+### Quarto (.Qmd)
+
+Es la evolución de R Markdown.
+
+Ventajas:
+
+-   Mayor flexibilidad
+-   Soporte para múltiples lenguajes
+-   Mejor integración con HTML moderno
+-   Presentaciones RevealJS
+-   Sitios web
+-   Libros
+-   Dashboards
+
+# 2. Markdown básico
+
+Markdown es un lenguaje sencillo para dar formato al texto.
+
+## Títulos
+
+``` markdown
+# Título principal
+
+## Subtítulo
+
+### Sección
+
+#### Subsección
+```
+
+## Negrita e itálica
+
+``` markdown
+**Texto en negrita**
+
+*Texto en cursiva*
+
+***Negrita y cursiva***
+```
+
+Resultado:
+
+**Texto en negrita**
+
+*Texto en cursiva*
+
+***Negrita y cursiva***
+
+## Listas
+
+### Lista con viñetas
+
+``` markdown
+- Elemento 1
+- Elemento 2
+- Elemento 3
+```
+
+### Lista numerada
+
+``` markdown
+1. Primer paso
+2. Segundo paso
+3. Tercer paso
+```
+
+## Enlaces
+
+``` markdown
+[Google](https://www.google.com)
+```
+
+## Imágenes
+
+``` markdown
+![](imagen.png)
+```
+
+## Citas
+
+``` markdown
+> Esta es una cita.
+```
+
+Resultado:
+
+> Esta es una cita.
+
+## Tablas
+
+``` markdown
+| Variable | Tipo |
+|-----------|------|
+| salario | numérica |
+| seniority | categórica |
+```
+
+## Separadores
+
+``` markdown
+---
+```
+
+# 3. YAML
+
+## ¿Qué es YAML?
+
+YAML es el encabezado que aparece al comienzo de un documento Quarto.
+
+Controla:
+
+-   título
+-   autor
+-   formato de salida
+-   apariencia
+-   numeración
+-   tablas de contenido
+
+Siempre aparece entre:
+
+``` yaml
+---
+...
+---
+```
+
+## YAML mínimo
+
+``` yaml
+---
+title: "Mi primer informe"
+format: html
+---
+```
+
+## YAML con tabla de contenidos
+
+``` yaml
+---
+title: "Análisis descriptivo"
+author: "Juan Pérez"
+date: today
+
+format:
+  html:
+    toc: true
+    code-fold: true
+---
+```
+
+## YAML para una presentación RevealJS
+
+``` yaml
+---
+title: "Clase de R"
+
+format:
+  revealjs:
+    slide-number: true
+    transition: fade
+---
+```
+
+## YAML con tema visual
+
+``` yaml
+---
+title: "Reporte"
+
+format:
+  html:
+    theme: cosmo
+---
+```
+
+Otros temas:
+
+-   cosmo
+-   flatly
+-   litera
+-   minty
+-   pulse
+-   sandstone
+-   united
+-   yeti
+
+## Resumen
+
+1.  Quarto = texto + código + resultados.
+2.  Markdown = cómo escribimos el contenido.
+3.  YAML = cómo configuramos el documento.
