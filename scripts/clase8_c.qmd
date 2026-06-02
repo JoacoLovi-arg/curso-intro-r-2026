@@ -1,0 +1,201 @@
+---
+title: "Tablero de Delitos — Comuna `r params$comuna`"
+params: 
+  comuna: 1 
+format: 
+  dashboard:
+    orientation: rows
+---
+
+```{r seteo, include=F}
+library(tidyverse)
+library(lubridate)
+library(plotly)
+library(sf)
+library(leaflet)
+library(bslib)
+
+options(scipen = 999)
+
+knitr::opts_chunk$set(echo = F, warning = F, message = F)
+```
+
+```{r data, include=F}
+df_comunas <- st_read("https://data.buenosaires.gob.ar/dataset/comunas/resource/b0b627ac-5b47-4574-89ac-6999b63598ee/download")
+
+df_delitos <- read.csv(
+  "https://cdn.buenosaires.gob.ar/datosabiertos/datasets/ministerio-de-justicia-y-seguridad/delitos/delitos_2023.csv",
+  encoding = "UTF-8") %>%
+    mutate(
+    tipo_delito = as.factor(tipo),
+    fecha       = ymd(fecha),
+    horario     = as.numeric(franja)) %>%
+  mutate(comuna = as.numeric(comuna)) %>%
+  select(-c(tipo, franja))
+
+df_comisarias <- st_read("https://data.buenosaires.gob.ar/dataset/comisarias-policia-ciudad/resource/14715837-709d-471e-935d-892f8f413c95/download")
+```
+
+```{r data parametrizada, include=F}
+df_comunas    <- df_comunas    %>% filter(comuna == params$comuna)
+df_delitos    <- df_delitos    %>% filter(comuna == params$comuna)
+df_comisarias <- df_comisarias %>% filter(comuna == params$comuna)
+```
+
+## Row {height="15%"}
+
+```{r}
+#| content: valuebox
+#| title: "Total de delitos"
+list(
+  icon  = "shield-exclamation",
+  color = "danger",
+  value = nrow(df_delitos)
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Comisarías"
+list(
+  icon  = "building",
+  color = "primary",
+  value = nrow(df_comisarias)
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Barrios"
+list(
+  icon  = "geo-alt-fill",
+  color = "success",
+  value = length(unique(df_delitos$barrio))
+)
+```
+
+## Row {height="85%"}
+
+### Column
+
+### Delitos por día y hora
+
+```{r}
+df4_dias_horarios <- df_delitos %>%
+  mutate(dia = wday(fecha, label = TRUE)) %>%
+  group_by(dia, horario) %>%
+  summarise(cantidad = n(), .groups = "drop")
+
+p4_dias_horarios <- ggplot(
+  df4_dias_horarios,
+  aes(x    = dia,
+      y    = horario,
+      fill = cantidad)) +
+  geom_tile() +
+  geom_text(aes(label = cantidad),
+            color = "black",
+            size  = 3) +
+  scale_fill_distiller(palette = "YlOrRd", direction = 1) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Cantidad de delitos por día y hora",
+       x = NULL, y = "Horario")
+
+ggplotly(p4_dias_horarios)
+```
+
+### Delitos por comisaría
+
+```{r}
+df_delitos_sf <- df_delitos %>%
+  st_as_sf(
+    coords = c("longitud", "latitud"),
+    crs    = 4326,
+    na.fail = F
+  )
+
+df_comisarias_metros <- st_transform(df_comisarias, 5347)
+
+buffer_comisarias <- st_buffer(df_comisarias_metros, dist = 900)
+
+df_delitos_metros <- st_transform(df_delitos_sf, 5347)
+
+df_delitos_buffer <- st_join(
+  df_delitos_metros,
+  buffer_comisarias,
+  join   = st_within,
+  suffix = c("", "_buffer")
+)
+
+delitos_comisaria <- df_delitos_buffer %>%
+  st_drop_geometry() %>%
+  group_by(nombre) %>%
+  summarise(cantidad_delitos = n(), .groups = "drop")
+
+p1_comisarias <- ggplot(
+  delitos_comisaria,
+  aes(reorder(nombre, cantidad_delitos), cantidad_delitos, fill = nombre)
+) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  coord_flip() +
+  labs(title = "Delitos cercanos a cada comisaría",
+       x = NULL, y = "Cantidad de delitos")
+
+ggplotly(p1_comisarias)
+```
+
+### Column
+
+### Distribución espacial de delitos
+
+```{r}
+m_delitos <- leaflet() %>%
+  addProviderTiles("CartoDB.Positron")
+
+m_delitos <- m_delitos %>%
+  addMarkers(
+    data = filter(df_delitos_sf, tipo_delito == "Hurto"),
+    group = "Hurto",
+    clusterOptions = markerClusterOptions()
+  ) %>%
+  addMarkers(
+    data = filter(df_delitos_sf, tipo_delito == "Robo"),
+    group = "Robo",
+    clusterOptions = markerClusterOptions()
+  ) %>%
+  addMarkers(
+    data = filter(df_delitos_sf, tipo_delito == "Lesiones"),
+    group = "Lesiones",
+    clusterOptions = markerClusterOptions()
+  ) %>%
+  addMarkers(
+    data = filter(df_delitos_sf, tipo_delito == "Amenazas"),
+    group = "Amenazas",
+    clusterOptions = markerClusterOptions()
+  ) %>%
+  addMarkers(
+    data = filter(df_delitos_sf, tipo_delito == "Homicidios"),
+    group = "Homicidios",
+    clusterOptions = markerClusterOptions()
+  ) %>%
+  addMarkers(
+    data = filter(df_delitos_sf, tipo_delito == "Vialidad"),
+    group = "Vialidad",
+    clusterOptions = markerClusterOptions()
+  ) %>%
+  addLayersControl(
+    overlayGroups = c(
+      "Hurto",
+      "Robo",
+      "Lesiones",
+      "Amenazas",
+      "Homicidios",
+      "Vialidad"
+    ),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+m_delitos
+```

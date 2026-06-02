@@ -1,0 +1,155 @@
+---
+title: "Análisis de delitos en CABA 2023"
+author: "tu nombre y apellido"
+date: "`r Sys.Date()`"
+number-sections: true # numeración de secciones
+format:
+  html:
+    toc: true # tabla de contenidos flotante
+    toc-location: right # ubicación de la tabla de contenidos
+    code-fold: true # código plegable
+    # code-fold: show # código oculto
+    theme: minty # temas
+---
+
+```{r seteo, include=F}
+library(tidyverse)
+library(lubridate)
+library(plotly)
+library(DT)
+library(sf)
+library(leaflet)
+
+# elimino notación científica
+options(scipen = 999)
+
+# seteo global de outputs de chunks
+knitr::opts_chunk$set(#echo = F, # no muestra el código
+                      warning = F, # no muestra warnings
+                      message = F # no muestra mensajes
+                      )
+```
+
+```{r data, include=F}
+df_comunas <- st_read("https://data.buenosaires.gob.ar/dataset/comunas/resource/b0b627ac-5b47-4574-89ac-6999b63598ee/download")
+
+df_delitos <- read.csv(
+  "https://cdn.buenosaires.gob.ar/datosabiertos/datasets/ministerio-de-justicia-y-seguridad/delitos/delitos_2023.csv",
+  encoding = "UTF-8")%>%
+    mutate(
+    tipo_delito = as.factor(tipo),
+    fecha       = ymd(fecha),
+    horario     = as.numeric(franja)) %>%
+  mutate(comuna = as.numeric(comuna)) %>%
+  select(-c(tipo, franja))
+
+df_comisarias <- st_read("https://data.buenosaires.gob.ar/dataset/comisarias-policia-ciudad/resource/14715837-709d-471e-935d-892f8f413c95/download")
+
+```
+
+
+## Delitos en CABA
+
+El siguiente documento muestra la distribución de delitos en la comuna.
+
+```{r}
+datatable(
+  df_delitos%>%slice(1:1000), # achico df para renderizar más rápido
+  filter = "top", # agrega filtros por columna
+  extensions = "Buttons", # habilita funcionalidades extra
+  options = list(
+    dom = "Bfrtip",# ubicación de botones, filtros y tabla
+    buttons = c(# exportación de datos
+      "copy",
+      "csv",
+      "excel",
+      "pdf",
+      "print"
+    ),
+    pageLength = 10,# filas por página
+    scrollX = TRUE# scroll horizontal
+  )
+)
+```
+
+
+## Delitos durante la semana
+
+```{r}
+df4_dias_horarios <- df_delitos %>%
+  mutate(dia = wday(fecha, label = TRUE)) %>%
+  group_by(dia, horario) %>%
+  summarise(cantidad = n())
+
+p4_dias_horarios <- ggplot(
+  df4_dias_horarios,
+  aes(x    = dia,
+      y    = horario,
+      fill = cantidad)) +
+  geom_tile() +
+  geom_text(aes(label = cantidad),
+            color = "black",
+            size  = 3) +
+  scale_fill_distiller(palette = "YlOrRd", direction = 1) +
+  theme(legend.position = "none")+
+  labs(title = "Cantidad de delitos por día y hora")
+
+ggplotly(p4_dias_horarios)
+```
+
+## Delitos cercanos a comisarías de la comuna
+
+```{r}
+df_delitos_sf <- df_delitos %>%
+  st_as_sf(
+    coords = c("longitud", "latitud"), # columnas con coordenadas
+    crs = 4326, # WGS84
+    na.fail = F
+  )
+
+# transformamos comisarias a proyección con metros
+df_comisarias_metros <- st_transform(df_comisarias, 5347)
+
+# buffer de 900 metros (algo así como 9 cuadras)
+buffer_comisarias <- st_buffer(
+  df_comisarias_metros,
+  dist = 900 # algo así como 9 cuadras
+)
+
+# transformamos delitos a proyección con metros
+df_delitos_metros <- st_transform(df_delitos_sf, 5347)
+
+# delitos dentro del buffer de cada comisaría (JOIN ESPACIAL)
+df_delitos_buffer <- st_join(
+  df_delitos_metros,
+  buffer_comisarias,
+  join = st_within, 
+  suffix = c("", "_buffer"))
+
+# cantidad de delitos por comisaría 
+
+delitos_comisaria <- df_delitos_buffer %>%
+  st_drop_geometry() %>% # volvemos a df 
+  group_by(nombre) %>%
+  summarise(cantidad_delitos = n())
+
+p1_comisarias <- ggplot(delitos_comisaria, 
+                        aes(nombre, 
+                            cantidad_delitos,
+                            fill = nombre))+
+  geom_bar(stat = "identity")+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  coord_flip()
+p1_comisarias
+```
+
+## Distribución de delitos
+
+```{r}
+m2_iconos <- leaflet(df_delitos_sf%>%filter(!is.na(comuna))) %>%
+  addTiles() %>%
+  addMarkers(
+    clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE))
+m2_iconos
+```

@@ -1,0 +1,192 @@
+
+========================================
+MACHETE QUARTO / YAML
+========================================
+
+HTML BASICO
+----------------------------------------
+---
+title: "Mi informe"
+format: html
+---
+
+TABLA DE CONTENIDOS
+----------------------------------------
+---
+title: "Mi informe"
+
+format:
+  html:
+    toc: true
+---
+
+TABLA DE CONTENIDOS FLOTANTE
+----------------------------------------
+---
+title: "Mi informe"
+
+format:
+  html:
+    toc: true
+    toc-location: right
+---
+
+CODIGO PLEGABLE
+----------------------------------------
+---
+title: "Mi informe"
+
+format:
+  html:
+    code-fold: true
+---
+
+CODIGO OCULTO POR DEFECTO
+----------------------------------------
+---
+title: "Mi informe"
+
+format:
+  html:
+    code-fold: show
+---
+
+NUMERACION DE SECCIONES
+----------------------------------------
+---
+title: "Mi informe"
+
+number-sections: true
+
+format: html
+---
+
+TEMAS VISUALES
+----------------------------------------
+---
+title: "Mi informe"
+
+format:
+  html:
+    theme: cosmo
+---
+
+Temas:
+cosmo
+flatly
+litera
+minty
+pulse
+sandstone
+united
+yeti
+
+PDF
+----------------------------------------
+---
+title: "Mi informe"
+
+format: pdf
+---
+
+WORD
+----------------------------------------
+---
+title: "Mi informe"
+
+format: docx
+---
+
+POWERPOINT
+----------------------------------------
+---
+title: "Mi informe"
+
+format: pptx
+---
+
+REVEALJS
+----------------------------------------
+---
+title: "Mi presentación"
+
+format:
+  revealjs:
+    slide-number: true
+    transition: fade
+---
+
+REVEALJS CON DIMENSIONES
+----------------------------------------
+---
+title: "Mi presentación"
+
+format:
+  revealjs:
+    width: 1600
+    height: 900
+---
+
+REVEALJS CON LOGO
+----------------------------------------
+---
+title: "Mi presentación"
+
+logo: "logo.png"
+
+format:
+  revealjs:
+    slide-number: true
+---
+
+DASHBOARD
+----------------------------------------
+---
+title: "Mi dashboard"
+
+format:
+  dashboard:
+    orientation: columns
+---
+
+DASHBOARD CON SIDEBAR
+----------------------------------------
+---
+title: "Mi dashboard"
+
+format:
+  dashboard:
+    sidebar: true
+---
+
+PARAMETROS
+----------------------------------------
+---
+title: "Mi reporte"
+
+params:
+  comuna: 1
+
+format: html
+---
+
+EJECUCION SILENCIOSA
+----------------------------------------
+---
+execute:
+  warning: false
+  message: false
+---
+
+DATAFRAMES COMO TABLAS
+----------------------------------------
+---
+df-print: kable
+---
+
+CACHE
+----------------------------------------
+---
+execute:
+  cache: true
+---
