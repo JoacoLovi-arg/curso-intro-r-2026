@@ -1,15 +1,17 @@
----
-title: "Análisis de delitos en CABA 2023"
-author: "tu nombre y apellido"
+--- 
+title: "Análisis de delitos en CABA 2023" 
+author: "tu nombre y apellido" 
 date: "`r Sys.Date()`"
+
 number-sections: true # numeración de secciones
+
 format:
   html:
     toc: true # tabla de contenidos flotante
     toc-location: right # ubicación de la tabla de contenidos
     code-fold: true # código plegable
     # code-fold: show # código oculto
-    theme: minty # temas
+    theme: zephyr # temas
 ---
 
 ```{r seteo, include=F}
