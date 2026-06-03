@@ -1,6 +1,14 @@
 ---
-title: "Clase 8 - Comunicar resultados con Quarto"
-format: html
+title: "Introducción al análisis de datos con R para Ciencias Sociales"
+subtitle: "Comunicar con Quarto"
+date: "2026-06-03"
+author: "Núcleo de Innovación Social"
+format:
+  html:
+    # theme: cosmo
+    # theme: sandstone
+    theme: superhero
+    #theme: quartz
 ---
 
 # 1. Comunicar resultados con Quarto
@@ -247,8 +255,162 @@ Otros temas:
 -   united
 -   yeti
 
+Más temas [acá](https://quarto.org/docs/output-formats/html-themes.html)
+
+# 4. Opciones de chunks
+
+Las opciones de los chunks permiten controlar qué se ejecuta y qué se muestra en el documento final.
+
+## 4.1 echo
+
+`echo` controla si el código se muestra o no en el documento.
+
+```{r, echo=FALSE}
+
+summary(cars)
+```
+
+El resultado aparecerá en el documento, pero no el código.
+
+------------------------------------------------------------------------
+
+## 4.2 eval
+
+`eval` permite mostrar código sin ejecutarlo.
+
+```{r, eval=FALSE}
+
+install.packages("tidyverse")
+```
+
+Es útil para mostrar ejemplos que no queremos ejecutar durante el renderizado.
+
+------------------------------------------------------------------------
+
+## 4.3 include
+
+`include` oculta tanto el código como los resultados.
+
+```{r, include=FALSE}
+
+library(tidyverse)
+```
+
+Suele utilizarse para cargar librerías o preparar objetos auxiliares.
+
+------------------------------------------------------------------------
+
+## 4.4 warning
+
+`warning` permite ocultar advertencias.
+
+```{r, warning=FALSE}
+
+as.numeric(c("1","2","texto"))
+```
+
+Sin esta opción aparecería una advertencia indicando que se generaron valores faltantes.
+
+------------------------------------------------------------------------
+
+## 4.5 message
+
+`message` permite ocultar mensajes informativos.
+
+```{r, message=FALSE}
+
+library(tidyverse)
+```
+
+Muy útil para evitar que aparezcan los mensajes de carga de paquetes.
+
+------------------------------------------------------------------------
+
+## 4.6 error
+
+`error` permite continuar renderizando el documento aunque exista un error.
+
+```{r, error=FALSE}
+#| error: true
+
+1 / "texto"
+```
+
+El error aparecerá en el documento, pero el renderizado continuará.
+
+------------------------------------------------------------------------
+
+## 4.7 fig-width y fig-height
+
+Permiten controlar el tamaño de una figura.
+
+```{r, fig.width=8 , fig.height=4}
+
+hist(mtcars$mpg)
+```
+
+------------------------------------------------------------------------
+
+## 4.8 fig-cap
+
+Permite agregar una leyenda o caption a una figura.
+
+```{r, fig.cap="Distribución de millas por galón"}
+
+hist(mtcars$mpg)
+```
+
+------------------------------------------------------------------------
+
+## 4.9 Insertar imágenes con Markdown
+
+Una imagen puede insertarse directamente mediante Markdown:
+
+``` markdown
+![](../varios/logoNIS.png)
+```
+
+También podemos controlar su tamaño:
+
+``` markdown
+![](../varios/logoNIS.png){width=50%}
+```
+
+------------------------------------------------------------------------
+
+## 4.10 Insertar imágenes con knitr
+
+Otra alternativa es utilizar `knitr::include_graphics()`:
+
+```{r, echo=F, fig.cap="Logo Institucional"}
+
+
+knitr::include_graphics("../varios/logoNIS.png")
+```
+
+Esta opción es útil porque la imagen se comporta como una figura y puede recibir captions, numeración y referencias cruzadas.
+
+------------------------------------------------------------------------
+
+## knit
+
+| Opción     | Función                     |
+|------------|-----------------------------|
+| echo       | Mostrar u ocultar código    |
+| eval       | Ejecutar o no ejecutar      |
+| include    | Ocultar código y resultados |
+| warning    | Ocultar advertencias        |
+| message    | Ocultar mensajes            |
+| error      | Continuar ante errores      |
+| fig-width  | Ancho de figura             |
+| fig-height | Alto de figura              |
+| fig-cap    | Leyenda de figura           |
+
+Más info en la [documentación](https://quarto.org/docs/reference/formats/html.html)
+
 ## Resumen
 
 1.  Quarto = texto + código + resultados.
 2.  Markdown = cómo escribimos el contenido.
 3.  YAML = cómo configuramos el documento.
+4.  KNIT = opciones de kniteo de chunks
